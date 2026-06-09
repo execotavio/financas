@@ -8,6 +8,7 @@ const state = {
   monthTransactions: [],
   yearTransactions: [],
   useSplits: false,
+  movementEditingId: null,
 };
 
 const fmtCurrency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -81,6 +82,76 @@ function setActiveTab(tabId) {
   document.querySelector("#tabButtonApp").classList.toggle("active", !sheetActive);
   document.querySelector("#tabButtonSheet").setAttribute("aria-selected", String(sheetActive));
   document.querySelector("#tabButtonApp").setAttribute("aria-selected", String(!sheetActive));
+}
+
+function movementIdValue(id) {
+  if (typeof id === "string" && id.startsWith("m-")) {
+    const value = Number(id.slice(2));
+    return Number.isFinite(value) ? value : null;
+  }
+  return null;
+}
+
+function isMovementTransaction(tx) {
+  return movementIdValue(tx.id) !== null;
+}
+
+function prepareMovementPayload(tx) {
+  const movementType = tx.movement_type === "entrada" ? "entrada" : "saida";
+  const amountNumber = Math.abs(parseMoney(tx.amount));
+  const amount = amountNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return {
+    tx_date: tx.tx_date || new Date().toISOString().slice(0, 10),
+    movement_type: movementType,
+    payment_method: tx.payment_method || "pix",
+    description: tx.description || "",
+    amount,
+  };
+}
+
+function startMovementEdit(movementId, payload) {
+  const form = document.querySelector("#movementForm");
+  state.movementEditingId = movementId;
+  form.tx_date.value = payload.tx_date;
+  form.movement_type.value = payload.movement_type;
+  form.payment_method.value = payload.payment_method || "pix";
+  form.description.value = payload.description;
+  form.amount.value = payload.amount;
+  form.querySelector('button[type="submit"]').textContent = "Atualizar movimentação";
+}
+
+function resetMovementForm() {
+  const form = document.querySelector("#movementForm");
+  form.reset();
+  form.tx_date.value = new Date().toISOString().slice(0, 10);
+  state.movementEditingId = null;
+  form.querySelector('button[type="submit"]').textContent = "Salvar movimentação";
+}
+
+async function handleMovementAction(event) {
+  const button = event.target.closest("button[data-movement-action]");
+  if (!button) return;
+  const action = button.dataset.movementAction;
+  const movementId = Number(button.dataset.movementId || 0);
+  if (!Number.isFinite(movementId) || movementId <= 0) return;
+  if (action === "edit") {
+    const tx = state.monthTransactions.find((item) => movementIdValue(item.id) === movementId);
+    if (!tx) {
+      toast("Movimentação não encontrada.");
+      return;
+    }
+    startMovementEdit(movementId, prepareMovementPayload(tx));
+    toast("Edição carregada no formulário.");
+    return;
+  }
+  if (action === "delete") {
+    const confirmed = window.confirm("Deseja excluir esta movimentação?");
+    if (!confirmed) return;
+    await api(`/api/movements/${movementId}`, { method: "DELETE" });
+    toast("Movimentação excluída.");
+    if (state.movementEditingId === movementId) resetMovementForm();
+    await refreshEverything();
+  }
 }
 
 function buildYearMovements() {
@@ -207,12 +278,16 @@ async function loadYearTransactions() {
 
 function buildMonthRows() {
   const rows = state.monthTransactions.map((tx) => ({
+    id: tx.id,
+    movement_id: movementIdValue(tx.id),
     tx_date: tx.tx_date,
     movement_type: tx.movement_type || "saida",
     payment_method: tx.payment_method ? tx.payment_method : paymentLabelFromTx(tx),
     category_name: tx.has_splits ? "Detalhada" : tx.category_name || "",
     description: tx.description,
     amount: Number(tx.amount || 0),
+    can_edit: isMovementTransaction(tx),
+    can_delete: isMovementTransaction(tx),
   }));
   rows.sort((a, b) => String(a.tx_date).localeCompare(String(b.tx_date)));
   return rows;
@@ -222,18 +297,20 @@ function renderMonthTable() {
   const rows = buildMonthRows();
   document.querySelector("#movementsBody").innerHTML = rows.length
     ? rows
-        .map(
-          (row) => `<tr>
+        .map((row) => `<tr>
         <td>${row.tx_date || ""}</td>
         <td>${row.movement_type || ""}</td>
         <td>${row.payment_method || ""}</td>
         <td>${row.category_name || ""}</td>
         <td>${row.description || ""}</td>
         <td>${money(row.movement_type === "entrada" ? Math.abs(parseMoney(row.amount)) : -Math.abs(parseMoney(row.amount)))}</td>
-      </tr>`
-        )
+        <td>
+          ${row.can_edit ? `<button type="button" class="ghost table-action" data-movement-action="edit" data-movement-id="${row.movement_id}">Editar</button>` : ""}
+          ${row.can_delete ? `<button type="button" class="danger table-action" data-movement-action="delete" data-movement-id="${row.movement_id}">Excluir</button>` : ""}
+        </td>
+      </tr>`)
         .join("")
-    : '<tr><td colspan="6" class="hint">Sem movimentações no mês.</td></tr>';
+    : '<tr><td colspan="7" class="hint">Sem movimentações no mês.</td></tr>';
 }
 
 function bindModals() {
@@ -338,11 +415,19 @@ document.querySelector("#transactionForm").addEventListener("submit", async (eve
 document.querySelector("#movementForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const data = formDataObject(event.currentTarget);
-  await api("/api/movements", { method: "POST", body: JSON.stringify(data) });
-  event.currentTarget.reset();
-  event.currentTarget.tx_date.value = new Date().toISOString().slice(0, 10);
-  toast("Movimentação salva.");
+  if (state.movementEditingId) {
+    await api(`/api/movements/${state.movementEditingId}`, { method: "PUT", body: JSON.stringify(data) });
+    toast("Movimentação atualizada.");
+  } else {
+    await api("/api/movements", { method: "POST", body: JSON.stringify(data) });
+    toast("Movimentação salva.");
+  }
+  resetMovementForm();
   await refreshEverything();
+});
+
+document.querySelector("#movementsBody").addEventListener("click", (event) => {
+  handleMovementAction(event).catch((error) => toast(error.message));
 });
 
 document.querySelector("#invoiceForm").addEventListener("submit", async (event) => {

@@ -13,7 +13,11 @@
       "Bash(node *)",
       "Bash(mvn *)",
       "Bash(cd *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "KillShell",
+      "Bash(taskkill *)"
     ]
   }
 }
