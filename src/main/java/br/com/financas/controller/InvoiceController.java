@@ -1,5 +1,6 @@
 package br.com.financas.controller;
 
+import br.com.financas.dto.InvoiceResponse;
 import br.com.financas.service.FinanceService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/invoices")
@@ -23,12 +23,12 @@ public class InvoiceController {
     }
 
     @GetMapping
-    public List<Map<String, Object>> listInvoices() {
+    public List<InvoiceResponse> listInvoices() {
         return service.listInvoices();
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Map<String, Object> uploadInvoice(
+    public InvoiceResponse uploadInvoice(
             @RequestParam("card_id") Long cardId,
             @RequestParam("statement_month") String statementMonth,
             @RequestParam("file") MultipartFile file

@@ -1,6 +1,7 @@
 package br.com.financas.controller;
 
 import br.com.financas.dto.CardRequest;
+import br.com.financas.dto.CardResponse;
 import br.com.financas.service.FinanceService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cards")
@@ -21,12 +21,12 @@ public class CardController {
     }
 
     @GetMapping
-    public List<Map<String, Object>> listCards() {
+    public List<CardResponse> listCards() {
         return service.listCards();
     }
 
     @PostMapping
-    public Map<String, Object> createCard(@RequestBody CardRequest payload) {
+    public CardResponse createCard(@RequestBody CardRequest payload) {
         return service.createCard(payload);
     }
 }

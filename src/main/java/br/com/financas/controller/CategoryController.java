@@ -1,6 +1,7 @@
 package br.com.financas.controller;
 
 import br.com.financas.dto.CategoryRequest;
+import br.com.financas.dto.CategoryResponse;
 import br.com.financas.service.FinanceService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -21,12 +21,12 @@ public class CategoryController {
     }
 
     @GetMapping
-    public List<Map<String, Object>> listCategories() {
+    public List<CategoryResponse> listCategories() {
         return service.listCategories();
     }
 
     @PostMapping
-    public Map<String, Object> createCategory(@RequestBody CategoryRequest payload) {
+    public CategoryResponse createCategory(@RequestBody CategoryRequest payload) {
         return service.createCategory(payload);
     }
 }
