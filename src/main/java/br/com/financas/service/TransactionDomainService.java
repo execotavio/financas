@@ -3,6 +3,8 @@ package br.com.financas.service;
 import br.com.financas.dto.SplitRequest;
 import br.com.financas.dto.TransactionRequest;
 import br.com.financas.dto.TransactionResponse;
+import br.com.financas.mapper.TransactionRowMapper;
+import br.com.financas.validation.TransactionRequestValidator;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,14 @@ public class TransactionDomainService extends JdbcFinanceSupport {
 
     public List<TransactionResponse> listTransactionsByMonth(String month) {
         if (month == null || month.length() != 7) return List.of();
+        return listTransactions(month, null, null);
+    }
+
+    public List<TransactionResponse> listTransactions(String month, Integer page, Integer size) {
+        if (month == null || month.length() != 7) return List.of();
+        int safeSize = size == null || size < 1 ? 5000 : size;
+        int safePage = page == null || page < 0 ? 0 : page;
+        int offset = safePage * safeSize;
         String start = month + "-01";
         LocalDate endDate = LocalDate.parse(start).plusMonths(1);
         String end = endDate.format(DateTimeFormatter.ISO_DATE);
@@ -34,47 +44,26 @@ public class TransactionDomainService extends JdbcFinanceSupport {
                 LEFT JOIN categories cat ON cat.id = t.category_id
                 WHERE t.tx_date >= ? AND t.tx_date < ?
                 ORDER BY t.tx_date ASC, t.id ASC
-                """, (rs, i) -> new TransactionResponse(
-                rs.getLong("id"),
-                rs.getString("tx_date"),
-                rs.getString("description"),
-                centsToAmount(rs.getLong("amount_cents")),
-                rs.getObject("installment_total") == null ? 1 : rs.getInt("installment_total"),
-                rs.getString("card_name"),
-                rs.getString("category_name"),
-                rs.getInt("has_splits") == 1,
-                "saida",
-                rs.getString("card_name") == null ? "pix" : "card"
-        ), start, end));
+                LIMIT ? OFFSET ?
+                """, TransactionRowMapper.transactionRowMapper(cents -> centsToAmount(cents)), start, end, safeSize, offset));
 
         rows.addAll(jdbc.query("""
                 SELECT id, tx_date, movement_type, payment_method, description, amount_cents
                 FROM movements
                 WHERE tx_date >= ? AND tx_date < ?
                 ORDER BY tx_date ASC, id ASC
-                """, (rs, i) -> new TransactionResponse(
-                "m-" + rs.getLong("id"),
-                rs.getString("tx_date"),
-                rs.getString("description"),
-                centsToAmount(rs.getLong("amount_cents")),
-                1,
-                null,
-                rs.getString("movement_type").equals("entrada") ? "Entrada" : "Saída",
-                false,
-                rs.getString("movement_type"),
-                rs.getString("payment_method")
-        ), start, end));
+                LIMIT ? OFFSET ?
+                """, TransactionRowMapper.movementRowMapper(cents -> centsToAmount(cents)), start, end, safeSize, offset));
 
         rows.sort((a, b) -> String.valueOf(a.txDate()).compareTo(String.valueOf(b.txDate())));
         return rows;
     }
 
     public TransactionResponse createTransaction(TransactionRequest request) {
+        TransactionRequestValidator.validate(request);
         String txDate = text(request.getTxDate());
-        if (txDate.isBlank()) throw new IllegalArgumentException("Data é obrigatória");
         String description = text(request.getDescription());
-        if (description.isBlank()) throw new IllegalArgumentException("Descrição é obrigatória");
-        long amountCents = parseMoneyToCents(request.getAmount());
+        long amountCents = TransactionRequestValidator.parseMoneyToCents(request.getAmount());
         Long cardId = request.getCardId();
         Long categoryId = request.getCategoryId();
         Integer installmentTotalValue = request.getInstallmentTotal();
@@ -82,11 +71,6 @@ public class TransactionDomainService extends JdbcFinanceSupport {
         List<SplitRequest> splits = request.getSplits() == null ? List.of() : request.getSplits();
 
         if (!splits.isEmpty()) {
-            long splitTotal = 0;
-            for (SplitRequest split : splits) {
-                splitTotal += parseMoneyToCents(split.getAmount());
-            }
-            if (splitTotal != amountCents) throw new IllegalArgumentException("A soma dos detalhamentos deve bater com o valor total");
             categoryId = null;
         }
 
@@ -122,18 +106,7 @@ public class TransactionDomainService extends JdbcFinanceSupport {
                     LEFT JOIN cards c ON c.id = t.card_id
                     LEFT JOIN categories cat ON cat.id = t.category_id
                     WHERE t.id = ?
-                    """, (rs, i) -> new TransactionResponse(
-                    rs.getLong("id"),
-                    rs.getString("tx_date"),
-                    rs.getString("description"),
-                    centsToAmount(rs.getLong("amount_cents")),
-                    rs.getObject("installment_total") == null ? 1 : rs.getInt("installment_total"),
-                    rs.getString("card_name"),
-                    rs.getString("category_name"),
-                    rs.getInt("has_splits") == 1,
-                    "saida",
-                    rs.getString("card_name") == null ? "pix" : "card"
-            ), id);
+                    """, TransactionRowMapper.transactionRowMapper(cents -> centsToAmount(cents)), id);
         } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("Transação não encontrada");
         }

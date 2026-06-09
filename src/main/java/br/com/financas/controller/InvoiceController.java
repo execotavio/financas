@@ -23,8 +23,13 @@ public class InvoiceController {
     }
 
     @GetMapping
-    public List<InvoiceResponse> listInvoices() {
-        return service.listInvoices();
+    public List<InvoiceResponse> listInvoices(
+            @RequestParam(value = "card_id", required = false) Long cardId,
+            @RequestParam(value = "statement_month", required = false) String statementMonth,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size
+    ) {
+        return service.listInvoices(cardId, statementMonth, page, size);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

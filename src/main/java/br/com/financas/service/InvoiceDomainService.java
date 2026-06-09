@@ -1,6 +1,7 @@
 package br.com.financas.service;
 
 import br.com.financas.dto.InvoiceResponse;
+import br.com.financas.mapper.InvoiceRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,16 +27,52 @@ public class InvoiceDomainService extends JdbcFinanceSupport {
                 FROM invoice_imports i
                 LEFT JOIN cards c ON c.id = i.card_id
                 ORDER BY i.id DESC
-                """, (rs, i) -> new InvoiceResponse(
-                rs.getLong("id"),
-                rs.getLong("card_id"),
-                rs.getString("statement_month"),
-                rs.getString("filename"),
-                rs.getInt("total_lines"),
-                rs.getInt("matched_lines"),
-                rs.getString("status"),
-                rs.getString("card_name")
-        ));
+                """, InvoiceRowMapper.rowMapper());
+    }
+
+    public List<InvoiceResponse> listInvoices(Long cardId, String statementMonth, Integer page, Integer size) {
+        if (cardId == null && (statementMonth == null || statementMonth.isBlank()) && page == null && size == null) return listInvoices();
+        int safeSize = size == null || size < 1 ? 50 : size;
+        int safePage = page == null || page < 0 ? 0 : page;
+        int offset = safePage * safeSize;
+        String month = statementMonth == null ? "" : statementMonth.trim();
+        if (cardId == null && month.isBlank()) {
+            return jdbc.query("""
+                    SELECT i.id, i.card_id, i.statement_month, i.filename, i.total_lines, i.matched_lines, i.status, c.name AS card_name
+                    FROM invoice_imports i
+                    LEFT JOIN cards c ON c.id = i.card_id
+                    ORDER BY i.id DESC
+                    LIMIT ? OFFSET ?
+                    """, InvoiceRowMapper.rowMapper(), safeSize, offset);
+        }
+        if (cardId == null) {
+            return jdbc.query("""
+                    SELECT i.id, i.card_id, i.statement_month, i.filename, i.total_lines, i.matched_lines, i.status, c.name AS card_name
+                    FROM invoice_imports i
+                    LEFT JOIN cards c ON c.id = i.card_id
+                    WHERE i.statement_month = ?
+                    ORDER BY i.id DESC
+                    LIMIT ? OFFSET ?
+                    """, InvoiceRowMapper.rowMapper(), month, safeSize, offset);
+        }
+        if (month.isBlank()) {
+            return jdbc.query("""
+                    SELECT i.id, i.card_id, i.statement_month, i.filename, i.total_lines, i.matched_lines, i.status, c.name AS card_name
+                    FROM invoice_imports i
+                    LEFT JOIN cards c ON c.id = i.card_id
+                    WHERE i.card_id = ?
+                    ORDER BY i.id DESC
+                    LIMIT ? OFFSET ?
+                    """, InvoiceRowMapper.rowMapper(), cardId, safeSize, offset);
+        }
+        return jdbc.query("""
+                SELECT i.id, i.card_id, i.statement_month, i.filename, i.total_lines, i.matched_lines, i.status, c.name AS card_name
+                FROM invoice_imports i
+                LEFT JOIN cards c ON c.id = i.card_id
+                WHERE i.card_id = ? AND i.statement_month = ?
+                ORDER BY i.id DESC
+                LIMIT ? OFFSET ?
+                """, InvoiceRowMapper.rowMapper(), cardId, month, safeSize, offset);
     }
 
     public InvoiceResponse uploadInvoice(Long cardId, String statementMonth, MultipartFile file) throws IOException {

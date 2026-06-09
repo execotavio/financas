@@ -11,7 +11,9 @@
       "Bash(python *)",
       "Bash(python *)",
       "Bash(node *)",
-      "Bash(mvn *)"
+      "Bash(mvn *)",
+      "Bash(cd *)",
+      "Bash(git *)"
     ]
   }
 }

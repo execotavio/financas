@@ -17,6 +17,10 @@ c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\S
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\TransactionRequest.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\TransactionResponse.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\FinancasApplication.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\mapper\CardRowMapper.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\mapper\CategoryRowMapper.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\mapper\InvoiceRowMapper.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\mapper\TransactionRowMapper.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\CardDomainService.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\CategoryDomainService.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\FinanceService.java
@@ -24,3 +28,7 @@ c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\servi
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\JdbcFinanceSupport.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\MovementDomainService.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\TransactionDomainService.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\validation\CardRequestValidator.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\validation\CategoryRequestValidator.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\validation\MovementRequestValidator.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\validation\TransactionRequestValidator.java

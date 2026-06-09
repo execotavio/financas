@@ -22,8 +22,12 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<TransactionResponse> listByMonth(@RequestParam("month") String month) {
-        return service.listTransactionsByMonth(month);
+    public List<TransactionResponse> listByMonth(
+            @RequestParam("month") String month,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size
+    ) {
+        return service.listTransactions(month, page, size);
     }
 
     @PostMapping

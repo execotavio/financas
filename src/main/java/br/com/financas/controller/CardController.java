@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,8 +22,12 @@ public class CardController {
     }
 
     @GetMapping
-    public List<CardResponse> listCards() {
-        return service.listCards();
+    public List<CardResponse> listCards(
+            @RequestParam(value = "active", required = false) Integer active,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size
+    ) {
+        return service.listCards(active, page, size);
     }
 
     @PostMapping

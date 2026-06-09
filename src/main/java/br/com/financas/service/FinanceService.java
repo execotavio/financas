@@ -41,6 +41,10 @@ public class FinanceService {
         return cardDomainService.listCards();
     }
 
+    public List<CardResponse> listCards(Integer active, Integer page, Integer size) {
+        return cardDomainService.listCards(active, page, size);
+    }
+
     public CardResponse createCard(CardRequest request) {
         return cardDomainService.createCard(request);
     }
@@ -49,12 +53,20 @@ public class FinanceService {
         return categoryDomainService.listCategories();
     }
 
+    public List<CategoryResponse> listCategories(Integer active, Integer page, Integer size) {
+        return categoryDomainService.listCategories(active, page, size);
+    }
+
     public CategoryResponse createCategory(CategoryRequest request) {
         return categoryDomainService.createCategory(request);
     }
 
     public List<TransactionResponse> listTransactionsByMonth(String month) {
         return transactionDomainService.listTransactionsByMonth(month);
+    }
+
+    public List<TransactionResponse> listTransactions(String month, Integer page, Integer size) {
+        return transactionDomainService.listTransactions(month, page, size);
     }
 
     public MovementResponse createMovement(MovementRequest request) {
@@ -67,6 +79,10 @@ public class FinanceService {
 
     public List<InvoiceResponse> listInvoices() {
         return invoiceDomainService.listInvoices();
+    }
+
+    public List<InvoiceResponse> listInvoices(Long cardId, String statementMonth, Integer page, Integer size) {
+        return invoiceDomainService.listInvoices(cardId, statementMonth, page, size);
     }
 
     public InvoiceResponse uploadInvoice(Long cardId, String statementMonth, MultipartFile file) throws IOException {
