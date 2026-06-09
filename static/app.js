@@ -286,8 +286,7 @@ function buildMonthRows() {
     category_name: tx.has_splits ? "Detalhada" : tx.category_name || "",
     description: tx.description,
     amount: Number(tx.amount || 0),
-    can_edit: isMovementTransaction(tx),
-    can_delete: isMovementTransaction(tx),
+    is_movement: isMovementTransaction(tx),
   }));
   rows.sort((a, b) => String(a.tx_date).localeCompare(String(b.tx_date)));
   return rows;
@@ -295,22 +294,69 @@ function buildMonthRows() {
 
 function renderMonthTable() {
   const rows = buildMonthRows();
-  document.querySelector("#movementsBody").innerHTML = rows.length
-    ? rows
-        .map((row) => `<tr>
-        <td>${row.tx_date || ""}</td>
-        <td>${row.movement_type || ""}</td>
-        <td>${row.payment_method || ""}</td>
-        <td>${row.category_name || ""}</td>
-        <td>${row.description || ""}</td>
-        <td>${money(row.movement_type === "entrada" ? Math.abs(parseMoney(row.amount)) : -Math.abs(parseMoney(row.amount)))}</td>
-        <td>
-          ${row.can_edit ? `<button type="button" class="ghost table-action" data-movement-action="edit" data-movement-id="${row.movement_id}">Editar</button>` : ""}
-          ${row.can_delete ? `<button type="button" class="danger table-action" data-movement-action="delete" data-movement-id="${row.movement_id}">Excluir</button>` : ""}
-        </td>
-      </tr>`)
-        .join("")
-    : '<tr><td colspan="7" class="hint">Sem movimentações no mês.</td></tr>';
+  const body = document.querySelector("#movementsBody");
+  body.replaceChildren();
+
+  if (!rows.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 7;
+    td.className = "hint";
+    td.textContent = "Sem movimentações no mês.";
+    tr.append(td);
+    body.append(tr);
+    return;
+  }
+
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+
+    const tdDate = document.createElement("td");
+    tdDate.textContent = row.tx_date || "";
+    tr.append(tdDate);
+
+    const tdType = document.createElement("td");
+    tdType.textContent = row.movement_type || "";
+    tr.append(tdType);
+
+    const tdPayment = document.createElement("td");
+    tdPayment.textContent = row.payment_method || "";
+    tr.append(tdPayment);
+
+    const tdCategory = document.createElement("td");
+    tdCategory.textContent = row.category_name || "";
+    tr.append(tdCategory);
+
+    const tdDescription = document.createElement("td");
+    tdDescription.textContent = row.description || "";
+    tr.append(tdDescription);
+
+    const tdAmount = document.createElement("td");
+    tdAmount.textContent = money(row.movement_type === "entrada" ? Math.abs(parseMoney(row.amount)) : -Math.abs(parseMoney(row.amount)));
+    tr.append(tdAmount);
+
+    const tdActions = document.createElement("td");
+    if (row.is_movement) {
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "ghost table-action";
+      editButton.textContent = "Editar";
+      editButton.setAttribute("data-movement-action", "edit");
+      editButton.setAttribute("data-movement-id", String(row.movement_id || ""));
+      tdActions.append(editButton);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "danger table-action";
+      deleteButton.textContent = "Excluir";
+      deleteButton.setAttribute("data-movement-action", "delete");
+      deleteButton.setAttribute("data-movement-id", String(row.movement_id || ""));
+      tdActions.append(deleteButton);
+    }
+    tr.append(tdActions);
+
+    body.append(tr);
+  });
 }
 
 function bindModals() {

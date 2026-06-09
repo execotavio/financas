@@ -14,39 +14,27 @@ public class MovementDomainService extends JdbcFinanceSupport {
     }
 
     public MovementResponse createMovement(MovementRequest request) {
-        MovementRequestValidator.validate(request);
-        String txDate = text(request.getTxDate());
-        String movementType = text(request.getMovementType());
-        String paymentMethod = text(request.getPaymentMethod());
-        if (paymentMethod.isBlank()) paymentMethod = "pix";
-        String description = text(request.getDescription());
-        long amountCents = parseMoneyToCents(request.getAmount());
+        validateRequest(request);
+        NormalizedMovement normalized = normalizeRequest(request);
         jdbc.update("INSERT INTO movements(tx_date, movement_type, payment_method, description, amount_cents, created_at) VALUES(?,?,?,?,?,?)",
-                txDate, movementType, paymentMethod, description, amountCents, now());
+                normalized.txDate(), normalized.movementType(), normalized.paymentMethod(), normalized.description(), normalized.amountCents(), now());
         return new MovementResponse(
                 lastInsertId(),
-                txDate,
-                movementType,
-                paymentMethod,
-                description,
-                centsToAmount(amountCents),
-                movementType.equals("entrada") ? "Entrada" : "Saída"
+                normalized.txDate(),
+                normalized.movementType(),
+                normalized.paymentMethod(),
+                normalized.description(),
+                centsToAmount(normalized.amountCents()),
+                normalized.movementType().equals("entrada") ? "Entrada" : "Saída"
         );
     }
 
     public MovementResponse updateMovement(Long movementId, MovementRequest request) {
-        if (movementId == null || movementId <= 0) {
-            throw new IllegalArgumentException("Movimentação inválida");
-        }
-        MovementRequestValidator.validate(request);
-        String txDate = text(request.getTxDate());
-        String movementType = text(request.getMovementType());
-        String paymentMethod = text(request.getPaymentMethod());
-        if (paymentMethod.isBlank()) paymentMethod = "pix";
-        String description = text(request.getDescription());
-        long amountCents = parseMoneyToCents(request.getAmount());
+        validateMovementId(movementId);
+        validateRequest(request);
+        NormalizedMovement normalized = normalizeRequest(request);
         int updated = jdbc.update("UPDATE movements SET tx_date=?, movement_type=?, payment_method=?, description=?, amount_cents=? WHERE id=?",
-                txDate, movementType, paymentMethod, description, amountCents, movementId);
+                normalized.txDate(), normalized.movementType(), normalized.paymentMethod(), normalized.description(), normalized.amountCents(), movementId);
         if (updated == 0) {
             throw new IllegalArgumentException("Movimentação não encontrada");
         }
@@ -54,13 +42,34 @@ public class MovementDomainService extends JdbcFinanceSupport {
     }
 
     public void deleteMovement(Long movementId) {
-        if (movementId == null || movementId <= 0) {
-            throw new IllegalArgumentException("Movimentação inválida");
-        }
+        validateMovementId(movementId);
         int deleted = jdbc.update("DELETE FROM movements WHERE id=?", movementId);
         if (deleted == 0) {
             throw new IllegalArgumentException("Movimentação não encontrada");
         }
+    }
+
+    private void validateRequest(MovementRequest request) {
+        MovementRequestValidator.validate(request);
+    }
+
+    private void validateMovementId(Long movementId) {
+        if (movementId == null || movementId <= 0) {
+            throw new IllegalArgumentException("Movimentação inválida");
+        }
+    }
+
+    private NormalizedMovement normalizeRequest(MovementRequest request) {
+        String txDate = text(request.getTxDate());
+        String movementType = text(request.getMovementType());
+        String paymentMethod = text(request.getPaymentMethod());
+        if (paymentMethod.isBlank()) paymentMethod = "pix";
+        String description = text(request.getDescription());
+        long amountCents = parseMoneyToCents(request.getAmount());
+        return new NormalizedMovement(txDate, movementType, paymentMethod, description, amountCents);
+    }
+
+    private record NormalizedMovement(String txDate, String movementType, String paymentMethod, String description, long amountCents) {
     }
 
     private MovementResponse getMovement(Long movementId) {
@@ -79,7 +88,7 @@ public class MovementDomainService extends JdbcFinanceSupport {
                     rs.getString("movement_type").equals("entrada") ? "Entrada" : "Saída"
             ), movementId);
         } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("Movimentação não encontrada");
+            throw new IllegalArgumentException("Movimentação não encontrada", e);
         }
     }
 }
