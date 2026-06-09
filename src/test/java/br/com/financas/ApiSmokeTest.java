@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,15 +20,16 @@ class ApiSmokeTest {
 
     @Test
     void shouldCreateAndListCoreData() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
         Map<String, Object> card = service.createCard(Map.of(
-                "name", "Teste",
+                "name", "Teste-" + suffix,
                 "bank", "Banco",
                 "last_digits", "1234",
                 "closing_day", 28,
                 "due_day", 10
         ));
         Map<String, Object> category = service.createCategory(Map.of(
-                "name", "Mercado",
+                "name", "Mercado-" + suffix,
                 "color", "#111111"
         ));
         Map<String, Object> movement = service.createMovement(Map.of(

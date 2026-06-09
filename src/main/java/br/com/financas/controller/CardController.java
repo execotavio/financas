@@ -1,5 +1,6 @@
 package br.com.financas.controller;
 
+import br.com.financas.dto.CardRequest;
 import br.com.financas.service.FinanceService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class CardController {
     }
 
     @PostMapping
-    public Map<String, Object> createCard(@RequestBody Map<String, Object> payload) {
+    public Map<String, Object> createCard(@RequestBody CardRequest payload) {
         return service.createCard(payload);
     }
 }

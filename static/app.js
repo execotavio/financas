@@ -56,7 +56,7 @@ async function api(path, options = {}) {
   const contentType = response.headers.get("content-type") || "";
   const payload = contentType.includes("application/json") ? await response.json() : await response.text();
   if (!response.ok) {
-    const message = typeof payload === "string" ? payload : payload?.error;
+    const message = typeof payload === "string" ? payload : payload?.message || payload?.error;
     throw new Error(message || `Erro HTTP ${response.status}`);
   }
   return payload;

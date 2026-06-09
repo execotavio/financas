@@ -1,5 +1,6 @@
 package br.com.financas.controller;
 
+import br.com.financas.dto.CategoryRequest;
 import br.com.financas.service.FinanceService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    public Map<String, Object> createCategory(@RequestBody Map<String, Object> payload) {
+    public Map<String, Object> createCategory(@RequestBody CategoryRequest payload) {
         return service.createCategory(payload);
     }
 }

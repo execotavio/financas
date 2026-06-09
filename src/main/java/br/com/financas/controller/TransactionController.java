@@ -1,5 +1,6 @@
 package br.com.financas.controller;
 
+import br.com.financas.dto.TransactionRequest;
 import br.com.financas.service.FinanceService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +27,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public Map<String, Object> createTransaction(@RequestBody Map<String, Object> payload) {
+    public Map<String, Object> createTransaction(@RequestBody TransactionRequest payload) {
         return service.createTransaction(payload);
     }
 }

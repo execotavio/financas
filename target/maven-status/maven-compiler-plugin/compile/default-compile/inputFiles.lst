@@ -5,5 +5,17 @@ c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\contr
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\controller\InvoiceController.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\controller\MovementController.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\controller\TransactionController.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\ApiErrorResponse.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\CardRequest.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\CategoryRequest.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\MovementRequest.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\SplitRequest.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\dto\TransactionRequest.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\FinancasApplication.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\CardDomainService.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\CategoryDomainService.java
 c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\FinanceService.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\InvoiceDomainService.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\JdbcFinanceSupport.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\MovementDomainService.java
+c:\Users\atomo\OneDrive\Documentos\Finanças\src\main\java\br\com\financas\service\TransactionDomainService.java
