@@ -4,16 +4,12 @@
       "Bash(powershell *)",
       "Bash(from *)",
       "Bash(python *)",
-      "Bash(python *)",
-      "Bash(python *)",
-      "Bash(python *)",
-      "Bash(python *)",
-      "Bash(python *)",
-      "Bash(python *)",
       "Bash(node *)",
       "Bash(mvn *)",
       "Bash(cd *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "KillShell",
+      "Bash(taskkill *)"
     ]
   }
 }
