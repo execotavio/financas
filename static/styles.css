@@ -353,6 +353,10 @@ td {
   white-space: nowrap;
 }
 
+.table-action {
+  margin-right: 6px;
+}
+
 th {
   color: var(--muted);
   font-size: 12px;

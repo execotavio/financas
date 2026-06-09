@@ -73,6 +73,14 @@ public class FinanceService {
         return movementDomainService.createMovement(request);
     }
 
+    public MovementResponse updateMovement(Long movementId, MovementRequest request) {
+        return movementDomainService.updateMovement(movementId, request);
+    }
+
+    public void deleteMovement(Long movementId) {
+        movementDomainService.deleteMovement(movementId);
+    }
+
     public TransactionResponse createTransaction(TransactionRequest request) {
         return transactionDomainService.createTransaction(request);
     }
