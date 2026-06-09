@@ -1,11 +1,11 @@
 package br.com.financas.service;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import org.springframework.jdbc.core.JdbcTemplate;
 
 abstract class JdbcFinanceSupport {
     protected final JdbcTemplate jdbc;
@@ -44,13 +44,13 @@ abstract class JdbcFinanceSupport {
     protected Integer intValue(Object value, int fallback) {
         String raw = text(value);
         if (raw.isBlank()) return fallback;
-        return Integer.parseInt(raw);
+        return Integer.valueOf(raw);
     }
 
     protected Long nullableLong(Object value) {
         String raw = text(value);
         if (raw.isBlank()) return null;
-        return Long.parseLong(raw);
+        return Long.valueOf(raw);
     }
 
     protected String normalize(String value) {
