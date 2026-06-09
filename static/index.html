@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Financas por Cartao</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Financas por Cartao</h1>
+        <p>Gastos em tempo real, faturas como conferencia.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="tabs-bar" role="tablist" aria-label="Abas do aplicativo">
+        <button id="tabButtonSheet" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="tabSheet">Planilha 2026</button>
+        <button id="tabButtonApp" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tabApp">Entradas e saídas</button>
+      </section>
+
+      <section id="tabSheet" class="tab-panel" role="tabpanel" aria-labelledby="tabButtonSheet">
+        <article class="panel">
+          <div class="panel-title">
+            <h2>Controle de gastos - 2026</h2>
+          </div>
+          <div class="table-wrap spreadsheet-wrap">
+            <table id="spreadsheetTable" class="spreadsheet-table"></table>
+          </div>
+        </article>
+      </section>
+
+      <section id="tabApp" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabButtonApp">
+        <section class="actions-bar">
+          <button class="ghost" type="button" data-modal-open="cardModal">Novo cartão</button>
+          <button class="ghost" type="button" data-modal-open="categoryModal">Nova categoria</button>
+          <button class="ghost" type="button" data-modal-open="invoiceModal">Upload de fatura</button>
+        </section>
+
+        <section class="work-layout">
+          <article class="stack-col">
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Novo gasto</h2>
+                <button id="toggleSplits" class="ghost" type="button">Detalhar</button>
+              </div>
+              <form id="transactionForm" class="stack">
+                <div class="form-grid">
+                  <label>Data <input name="tx_date" type="date" required /></label>
+                  <label>Forma de pagamento <select name="payment_method" id="paymentMethod"></select></label>
+                  <label>Valor <input name="amount" inputmode="decimal" placeholder="123,45" required /></label>
+                  <label>Parcelas <input name="installment_total" type="number" min="1" value="1" /></label>
+                </div>
+                <label>Estabelecimento / descrição <input name="description" required placeholder="Amazon, Mercado, Uber..." /></label>
+                <label id="singleCategoryWrap">Categoria <select name="category_id"></select></label>
+                <div id="splitEditor" class="split-editor hidden">
+                  <div class="panel-title compact">
+                    <h3>Detalhamento da compra</h3>
+                    <button id="addSplit" class="ghost" type="button">Adicionar linha</button>
+                  </div>
+                  <div id="splitRows" class="stack"></div>
+                </div>
+                <button class="primary" type="submit">Registrar gasto</button>
+              </form>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Nova entrada ou saída</h2>
+              </div>
+              <form id="movementForm" class="stack">
+                <div class="form-grid">
+                  <label>Data <input name="tx_date" type="date" required /></label>
+                  <label>Tipo
+                    <select name="movement_type" required>
+                      <option value="entrada">Entrada</option>
+                      <option value="saida">Saída</option>
+                    </select>
+                  </label>
+                  <label>Forma de pagamento <select name="payment_method" id="movementPaymentMethod"></select></label>
+                  <label>Valor <input name="amount" inputmode="decimal" placeholder="0,00" required /></label>
+                </div>
+                <label>Descrição <input name="description" required placeholder="Salário, pagamento de fatura..." /></label>
+                <button class="primary" type="submit">Salvar movimentação</button>
+              </form>
+            </article>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title">
+              <h2>Movimentações do mês</h2>
+              <label class="month-inline">Mês <input id="appMonthFilter" type="month" /></label>
+            </div>
+            <div class="table-wrap app-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Forma</th>
+                    <th>Categoria</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="movementsBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="cardModal" class="modal">
+      <form id="cardForm" class="stack modal-body" method="dialog">
+        <div class="panel-title"><h3>Novo cartão</h3><button class="ghost" type="button" data-modal-close="cardModal">Fechar</button></div>
+        <div class="form-grid">
+          <label>Nome <input name="name" required placeholder="Itau Black" /></label>
+          <label>Banco <input name="bank" required placeholder="Itau" /></label>
+          <label>Final <input name="last_digits" maxlength="4" placeholder="1234" /></label>
+          <label>Fechamento <input name="closing_day" type="number" min="1" max="31" value="28" /></label>
+          <label>Vencimento <input name="due_day" type="number" min="1" max="31" value="10" /></label>
+        </div>
+        <button class="primary" type="submit">Salvar cartão</button>
+      </form>
+    </dialog>
+
+    <dialog id="categoryModal" class="modal">
+      <form id="categoryForm" class="stack modal-body" method="dialog">
+        <div class="panel-title"><h3>Nova categoria</h3><button class="ghost" type="button" data-modal-close="categoryModal">Fechar</button></div>
+        <div class="form-grid">
+          <label>Nome <input name="name" required placeholder="Nova categoria" /></label>
+          <label>Cor <input name="color" type="color" value="#2563eb" /></label>
+        </div>
+        <button class="primary" type="submit">Criar categoria</button>
+      </form>
+    </dialog>
+
+    <dialog id="invoiceModal" class="modal">
+      <form id="invoiceForm" class="stack modal-body" method="dialog">
+        <div class="panel-title"><h3>Upload de fatura</h3><button class="ghost" type="button" data-modal-close="invoiceModal">Fechar</button></div>
+        <label>Cartão <select name="card_id" required></select></label>
+        <label>Mês da fatura <input name="statement_month" type="month" required /></label>
+        <label>PDF <input name="file" type="file" accept="application/pdf" required /></label>
+        <button class="primary" type="submit">Importar e conferir</button>
+        <div id="invoiceResult" class="invoice-result"></div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

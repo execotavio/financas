@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell *)",
+      "Bash(from *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "Bash(python *)",
+      "Bash(node *)",
+      "Bash(mvn *)"
+    ]
+  }
+}
